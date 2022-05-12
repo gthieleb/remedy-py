@@ -26,7 +26,7 @@ class RemedyClient(RemedyAPI):
         self.proxies = proxies
         self.timeout = timeout
         self.port = port or DEFAULT_HTTPS_PORT if self.verify else port or DEFAULT_HTTP_PORT
-        self.base_url = HTTPS_BASE_URL(self.host, self.port) if self.verify else HTTP_BASE_URL(self.host, self.port)
+        self.base_url = HTTPS_BASE_URL(self.host, self.port)
         self.authHeaders = {"content-type": "application/x-www-form-urlencoded"}
         self.reqHeaders = self.build_request_headers()
 
@@ -115,6 +115,17 @@ class RemedyClient(RemedyAPI):
                                     proxies=self.proxies, timeout=self.timeout)
         response.raise_for_status()
         
+        return response.json(), response.status_code
+
+    def get_form_info(self, form_name):
+        """
+        Retrieves the information of the form schema.
+        """
+        url = self.base_url + REQUEST_PREFIX + "/{}".format(form_name)
+        response = requests.request("OPTIONS", url, headers=self.reqHeaders, verify=self.verify,
+                                    proxies=self.proxies, timeout=self.timeout)
+        response.raise_for_status()                                    
+
         return response.json(), response.status_code
 
     def get_form_entry(self, form_name, req_id, payload={}):
